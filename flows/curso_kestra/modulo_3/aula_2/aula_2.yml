@@ -1,0 +1,28 @@
+id: aula_2
+namespace: top_hawks.curso_kestra.modulo_3.aula_2
+description: |
+  Flow para obter dados de clima usando uma API pública.
+  Este flow demonstra o uso da propriedade "dependencies" introduzida no Kestra 0.23
+  que permite a instalação e cache automático de dependências Python.
+
+
+tasks:
+  - id: python
+    type: io.kestra.plugin.scripts.python.Commands
+    containerImage: python:3.13-slim
+    taskRunner:
+      type: io.kestra.plugin.scripts.runner.docker.Docker
+    namespaceFiles:
+      enabled: true
+    dependencies:
+      - requests
+      - kestra
+    commands:
+      - python aula_2.py
+
+
+triggers:
+  - id: agenda
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 */3 * * *" # A cada 3 horas
+    disabled: true

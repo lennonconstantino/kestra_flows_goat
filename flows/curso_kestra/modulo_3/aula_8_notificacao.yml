@@ -1,0 +1,27 @@
+id: aula_8_notificacao
+namespace: top_hawks.curso_kestra.modulo_3
+description: |
+  Flow que demonstra a notificação de erros
+
+tasks:
+  - id: send_slack_erros
+    type: io.kestra.plugin.notifications.slack.SlackIncomingWebhook
+    url: "{{kv('SLACK_ALERTA')}}"
+  
+    payload: |
+      {
+        "text": "{{trigger.state}} no flow :{{trigger.namespace}}.{{trigger.flowId}}"
+      }
+
+
+triggers:
+  - id: detector_de_erro
+    type: io.kestra.plugin.core.trigger.Flow
+    conditions:
+      - type: io.kestra.plugin.core.condition.ExecutionStatus
+        in:
+          - FAILED
+          - WARNING
+      - type: io.kestra.plugin.core.condition.ExecutionNamespace
+        namespace: top_hawks
+        prefix: true

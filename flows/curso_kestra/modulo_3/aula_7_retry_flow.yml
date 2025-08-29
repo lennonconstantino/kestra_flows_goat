@@ -1,0 +1,39 @@
+id: aula_7_retry_flow
+namespace: top_hawks.curso_kestra.modulo_3
+description: |
+  Flow que demonstra a implementação de retry do flow
+
+
+retry:
+  maxAttempt: 3
+  behavior: RETRY_FAILED_TASK # CREATE_NEW_EXECUTION 
+  type: constant
+  interval: PT1S
+
+
+tasks:
+  - id: wdir
+    type: io.kestra.plugin.core.flow.WorkingDirectory
+    tasks:
+      - id: clone_repository
+        type: io.kestra.plugin.git.Clone
+        url: https://github.com/TOP-HAWKS/top_hawks_kestra
+        branch: main
+
+      - id: processo_python_1
+        type: io.kestra.plugin.scripts.python.Commands
+        containerImage: python:3.13-slim
+        dependencies:
+        - cowsay==6.1
+        commands:
+          - python kestras_modulo3_aula3.py #nome do arquivo errado
+        
+
+      - id: processo_python
+        type: io.kestra.plugin.scripts.python.Commands
+        containerImage: python:3.13-slim
+        dependencies:
+        - cowsay==6.1
+        commands:
+          - if [ {{taskrun.attemptsCount}} -gt 0 ]; then echo "Repetição numero-> " {{taskrun.attemptsCount}}; else python arquivo_errado.py; fi
+        

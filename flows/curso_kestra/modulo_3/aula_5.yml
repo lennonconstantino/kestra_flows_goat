@@ -1,0 +1,57 @@
+id: aula_5
+namespace: top_hawks.curso_kestra.modulo_3
+description: |
+  Flow para demonstrar a integração entre múltiplos scripts Python.
+  Este fluxo mostra como passar informações entre tarefas consecutivas
+  e como trabalhar com scripts dentro e fora do WorkingDirectory.
+
+tasks:
+  - id: wdir
+    type: io.kestra.plugin.core.flow.WorkingDirectory
+    tasks:
+      # Esta tarefa simula um clone de repositório, mas está comentada para simplificação
+      - id: clone_repository
+        type: io.kestra.plugin.git.Clone
+        url: https://github.com/TOP-HAWKS/curso_kestra_python
+        branch: main
+        username: "{{kv('GIT_USER')}}"
+        password: "{{kv('GIT_PAT')}}"
+
+      - id: clima
+        type: io.kestra.plugin.scripts.python.Commands
+        containerImage: python:3.13-slim
+        dependencies:
+          - python-dotenv
+          - kestra
+          - requests
+        commands:
+          - python modulo_3/aula_5/aula_5_1.py
+        env:
+          CITY: "Rio de Janeiro"
+          LATITUDE: "-22.91"
+          LONGITUDE: "-43.17"
+
+      - id: outra_tarefa
+        type: io.kestra.plugin.scripts.python.Commands
+        containerImage: python:3.13-slim
+        dependencies:
+          - python-dotenv
+          - kestra
+          - requests
+        commands:
+          - python modulo_3/aula_5/aula_5_2.py
+        env:
+          # Aqui passamos a saída do Script A para o Script B
+          TRABALHO: "{{ outputs.clima.vars}}"
+  - id: alerta
+    type: io.kestra.plugin.notifications.whatsapp.WhatsAppIncomingWebhook
+    disabled: true
+    url: sua_url
+
+triggers:
+  - id: programacao_diaria
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 8 * * *"
+    disabled: true
+    timezone: America/Sao_Paulo
+    description: "Executa o fluxo diariamente às 8:00 (horário de Brasília)"

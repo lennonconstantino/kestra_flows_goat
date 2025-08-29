@@ -1,0 +1,19 @@
+id: aula_3
+namespace: top_hawks.curso_kestra.modulo_3
+
+tasks:
+  - id: wdir
+    type: io.kestra.plugin.core.flow.WorkingDirectory
+    tasks:
+      - id: clone_repository
+        type: io.kestra.plugin.git.Clone
+        url: https://github.com/TOP-HAWKS/top_hawks_kestra
+        branch: main
+
+      - id: ola_kestra
+        type: io.kestra.plugin.scripts.python.Commands
+        containerImage: python:3.13-slim
+        dependencies:
+        - cowsay==6.1
+        commands:
+          - python kestra_modulo3_aula3.py

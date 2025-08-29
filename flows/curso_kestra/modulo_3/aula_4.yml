@@ -1,0 +1,22 @@
+id: aula_4
+namespace: top_hawks.curso_kestra.modulo_3
+
+tasks:
+  - id: wdir
+    type: io.kestra.plugin.core.flow.WorkingDirectory
+    tasks:
+      - id: clone_repository
+        type: io.kestra.plugin.git.Clone
+        url: https://github.com/TOP-HAWKS/curso_kestra_python
+        branch: main
+        username: "{{kv('GIT_USER')}}"
+        password: "{{kv('GIT_PAT')}}"
+
+      - id: clima
+        type: io.kestra.plugin.scripts.python.Commands
+        containerImage: python:3.13-slim
+        dependencies:
+          - requests
+          - kestra
+        commands:
+          - python modulo_3/aula_2/aula_2.py
